@@ -9,15 +9,28 @@ import {
   TextField,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { GetCategoriesApi } from "../../api/CategoriesApi";
+import { GetMemoByCategoryId } from "../../api/MemosApi";
 
-const Sidebar = () => {
+const Sidebar = ({ setLists, setContent }) => {
   const inputRef = useRef(null);
   const [view, setView] = useState(false);
-  const [categories, setCategories] = useState([
-    { name: "test" },
-    { name: "todo" },
-  ]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await GetCategoriesApi();
+        const newCategories = response.data;
+
+        setCategories(newCategories);
+      } catch (error) {
+        console.error;
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -33,10 +46,30 @@ const Sidebar = () => {
     } else {
       setCategories((prevCategories) => [
         ...prevCategories, // 既存のカテゴリをそのまま保持
-        { name: newCategory }, // 新しいカテゴリを追加
+        { title: newCategory }, // 新しいカテゴリを追加
       ]);
       console.log(newCategory); // 新しいカテゴリをログに出力
       setView(false);
+    }
+  };
+
+  const clickHandler = async (id) => {
+    const memos = [];
+    setContent({ id: null, content: "" });
+    try {
+      const response = await GetMemoByCategoryId(id);
+      const datas = response.data;
+
+      datas.forEach((data) => {
+        memos.push({
+          id: data.id,
+          title: data.title,
+        });
+      });
+
+      setLists(memos);
+    } catch (error) {
+      console.error;
     }
   };
 
@@ -69,10 +102,13 @@ const Sidebar = () => {
         </Button>
         <Divider />
         <List>
-          {categories.map((Category, index) => (
-            <ListItem key={index} disablePadding>
-              <ListItemButton sx={{ color: "primary.contrastText" }}>
-                <ListItemText>{Category.name}</ListItemText>
+          {categories.map((Category) => (
+            <ListItem key={Category.id} disablePadding>
+              <ListItemButton
+                sx={{ color: "primary.contrastText" }}
+                onClick={() => clickHandler(Category.id)}
+              >
+                <ListItemText>{Category.title}</ListItemText>
               </ListItemButton>
             </ListItem>
           ))}

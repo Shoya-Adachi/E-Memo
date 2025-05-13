@@ -15,6 +15,8 @@ Rails.application.routes.draw do
             get :search
           end
         end
+
+        resources :categories
       end
   end
 end
