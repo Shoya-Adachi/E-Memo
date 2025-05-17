@@ -25,10 +25,25 @@ class Api::V1::MemoController < ApplicationController
     end
   end
 
+  # POST api/v1/memo
+  def create
+    memo = Memo.build(
+      title: params[:title],
+      content: params[:content],
+      category_id: params[:category_id]
+    )
+
+     if memo.save
+      render json: { status: 'success', data: memo }, status: :created
+    else
+      render json: { status: 'error', errors: memo.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   def update
     memo = Memo.find(params[:id])
 
-    if memo.update(content: params[:content])
+    if memo.update(content: params[:content], title: params[:title])
       render json: {status: 'success', data: memo}, status: :ok
     else
       render json: { status: 'error', errors: memo.errors.full_messages }, status: :unprocessable_entity

@@ -11,3 +11,15 @@ export const GetCategoriesApi = async () => {
     console.error;
   }
 };
+
+export const CreateCategoriesApi = async (title) => {
+  try {
+    const response = await axios.post(`http://${API_URL}/api/v1/categories`, {
+      title: title,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error;
+  }
+};
